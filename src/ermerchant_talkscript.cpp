@@ -22,6 +22,7 @@ using namespace std;
 
 static constexpr unsigned char get_talk_list_entry_result_function = 23;
 
+static array<from::EzState::event, 100> patched_event_array;
 static array<from::EzState::transition *, 100> patched_transition_array;
 
 /**
@@ -33,6 +34,7 @@ static bool patch_states(from::EzState::state_group *state_group)
     from::EzState::event *add_menu1_event = nullptr;
     from::EzState::event *add_menu2_event = nullptr;
     from::EzState::event *about_kale_event = nullptr;
+    from::EzState::state *add_menu_state = nullptr;
     from::EzState::state *menu_transition_state = nullptr;
 
     for (auto &state : state_group->states)
@@ -43,13 +45,11 @@ static bool patch_states(from::EzState::state_group *state_group)
             if (event.command == from::talk_command::add_talk_list_data)
             {
                 auto message_id = get_int_value(event.args[1]);
-                if (ranges::any_of(ermerchant::event_text_for_talk::purchase,
-                                   [&](auto id) { return id == message_id; }))
+                if (message_id == ermerchant::event_text_for_talk::purchase)
                 {
                     add_menu1_event = &event;
                 }
-                else if (ranges::any_of(ermerchant::event_text_for_talk::sell,
-                                        [&](auto id) { return id == message_id; }))
+                else if (message_id == ermerchant::event_text_for_talk::sell)
                 {
                     add_menu2_event = &event;
                 }
@@ -67,6 +67,7 @@ static bool patch_states(from::EzState::state_group *state_group)
                 if (message_id == ermerchant::event_text_for_talk::about_kale)
                 {
                     about_kale_event = &event;
+                    add_menu_state = &state;
                 }
             }
         }
@@ -83,18 +84,36 @@ static bool patch_states(from::EzState::state_group *state_group)
         }
     }
 
-    if (!add_menu1_event || !add_menu2_event || !about_kale_event || !menu_transition_state)
+    if (!about_kale_event || !menu_transition_state ||
+        ((!add_menu1_event || !add_menu2_event) && !add_menu_state))
     {
         return false;
     }
 
     spdlog::info("Patching state group x{}", 0x7fffffff - state_group->id);
 
-    // Change the "Purchase"/"Sell" menu options to "Browse Inventory"/"Browse Cut Content"
-    add_menu1_event->args[0] = browse_inventory_index_value;
-    add_menu1_event->args[1] = browse_inventory_message_id_value;
-    add_menu2_event->args[0] = browse_cut_content_index_value;
-    add_menu2_event->args[1] = browse_cut_content_message_id_value;
+    if (add_menu1_event && add_menu2_event)
+    {
+        // Change the "Purchase"/"Sell" menu options to "Browse Inventory"/"Browse Cut Content", if
+        // they were found
+        add_menu1_event->args[0] = browse_inventory_index_value;
+        add_menu1_event->args[1] = browse_inventory_message_id_value;
+        add_menu2_event->args[0] = browse_cut_content_index_value;
+        add_menu2_event->args[1] = browse_cut_content_message_id_value;
+    }
+    else if (add_menu_state)
+    {
+        // Otherwise, append new menu items. This can happen with mods that use different talk IDs
+        // or otherwise change Kalé's dialogue.
+        spdlog::info("Vanilla dialogue options not found, appending new options");
+        auto &events = add_menu_state->entry_events;
+        std::copy(events.begin(), events.end(), patched_event_array.begin());
+        patched_event_array[events.size()] = {from::talk_command::add_talk_list_data,
+                                              browse_inventory_args};
+        patched_event_array[events.size() + 1] = {from::talk_command::add_talk_list_data,
+                                                  browse_cut_content_args};
+        events = {patched_event_array.data(), events.size() + 2};
+    }
 
     // Add transitions to handle the new menu options. Note: they're added as the second and third
     // last elif statements, because the last one is an else that closes the talk menu.
