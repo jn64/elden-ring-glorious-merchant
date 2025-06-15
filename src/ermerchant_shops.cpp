@@ -28,6 +28,7 @@
 #include "modutils.hpp"
 
 static const std::wstring cut_content_prefix = L"[ERROR]";
+static const std::wstring reforged_cut_spirit_summon_prefix = L"Depleted ";
 
 static constexpr unsigned char lot_item_category_goods = 1;
 
@@ -114,6 +115,21 @@ static const std::set<long long> cut_content_protectors = {
     610300, // Ragged Loincloth
     611000, // Ragged Hat (Altered)
     611100, // Ragged Armor (Altered)
+    955000, // [ERR] Roundtable Helm
+    955100, // [ERR] Roundtable Armor
+    955200, // [ERR] Roundtable Gauntlets
+    955300, // [ERR] Roundtable Greaves
+    956100, // [ERR] Roundtable Armor (Altered)
+};
+
+static const std::set<long long> cut_content_weapons = {
+    33290000, // [ERR] ST Staff
+};
+
+static const std::set<long long> cut_content_accessories = {
+    3100, // Bluntstone Glintstone Blade
+    6120, // Invisible Trick Mirror
+    6121, // Unbeatable Trick Mirror
 };
 
 static constexpr unsigned int kale_alive_flag_id = 4700;
@@ -444,8 +460,12 @@ void ermerchant::setup_shops()
 
         std::vector<from::paramdef::SHOP_LINEUP_PARAM> *lineups = nullptr;
 
-        if (row.wepType == weapon_type_arrow || row.wepType == weapon_type_greatarrow ||
-            row.wepType == weapon_type_bolt || row.wepType == weapon_type_ballista_bolt)
+        if (cut_content_weapons.contains(id))
+        {
+            lineups = &cut_good_lineups;
+        }
+        else if (row.wepType == weapon_type_arrow || row.wepType == weapon_type_greatarrow ||
+                 row.wepType == weapon_type_bolt || row.wepType == weapon_type_ballista_bolt)
         {
 
             if (is_dlc)
@@ -537,6 +557,10 @@ void ermerchant::setup_shops()
 
         std::vector<from::paramdef::SHOP_LINEUP_PARAM> *lineups = nullptr;
 
+        if (cut_content_accessories.contains(id))
+        {
+            lineups = &cut_good_lineups;
+        }
         if (is_dlc)
         {
             lineups = &dlc_talisman_lineups;
@@ -632,7 +656,10 @@ void ermerchant::setup_shops()
                 auto upgrade_level = id % 100;
                 if (upgrade_level == 0)
                 {
-                    lineups = is_dlc ? &dlc_spirit_summon_lineups : &spirit_summon_lineups;
+                    if (goods_name.starts_with(reforged_cut_spirit_summon_prefix))
+                        lineups = &cut_good_lineups;
+                    else
+                        lineups = is_dlc ? &dlc_spirit_summon_lineups : &spirit_summon_lineups;
                 }
                 break;
             }
