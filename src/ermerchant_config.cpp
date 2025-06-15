@@ -9,7 +9,7 @@ void ermerchant::load_config(const std::filesystem::path &ini_path)
 {
     spdlog::info("Loading config from {}", ini_path.string());
 
-    mINI::INIFile file(ini_path.string());
+    mINI::INIFile file(ini_path);
     mINI::INIStructure ini;
     if (file.read(ini) && ini.has("ermerchant"))
     {

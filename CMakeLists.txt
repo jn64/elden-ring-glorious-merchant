@@ -23,9 +23,7 @@ FetchContent_Declare(pattern16
 
 FetchContent_Declare(mini
   GIT_REPOSITORY        https://github.com/metayeti/mINI.git
-  GIT_TAG               0.9.15
-  CONFIGURE_COMMAND     ""
-  BUILD_COMMAND         "")
+  GIT_TAG               0.9.18)
 
 set(SPDLOG_DISABLE_DEFAULT_LOGGER ON)
 set(SPDLOG_USE_STD_FORMAT ON)
@@ -47,9 +45,6 @@ FetchContent_MakeAvailable(minhook pattern16 mini spdlog steamworks-sdk)
 
 add_library(pattern16 INTERFACE)
 target_include_directories(pattern16 INTERFACE ${pattern16_SOURCE_DIR}/include)
-
-add_library(mini INTERFACE)
-target_include_directories(mini INTERFACE ${mini_SOURCE_DIR}/src)
 
 add_library(steamapi STATIC IMPORTED GLOBAL)
 set_property(TARGET steamapi APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
@@ -99,6 +94,6 @@ add_custom_command(TARGET EldenRingMerchantMod POST_BUILD
 target_link_libraries(EldenRingMerchantMod
   minhook
   pattern16
-  mini
+  mINI
   spdlog
   steamworks-sdk)
