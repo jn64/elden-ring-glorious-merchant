@@ -42,33 +42,40 @@ static bool patch_states(from::EzState::state_group *state_group)
         // Look for commands indicating Kalé's main menu state
         for (auto &event : state.entry_events)
         {
-            if (event.command == from::talk_command::add_talk_list_data)
+            int message_id = -1;
+            if (event.command == from::talk_command::add_talk_list_data ||
+                event.command == from::talk_command::add_talk_list_data_alt)
             {
-                auto message_id = get_int_value(event.args[1]);
-                if (message_id == ermerchant::event_text_for_talk::purchase)
-                {
-                    add_menu1_event = &event;
-                }
-                else if (message_id == ermerchant::event_text_for_talk::sell)
-                {
-                    add_menu2_event = &event;
-                }
-                else if (message_id == ermerchant::event_text_for_talk::browse_inventory ||
-                         message_id == ermerchant::event_text_for_talk::browse_cut_content)
-                {
-                    spdlog::debug("Not patching state group x{}, already patched",
-                                  0x7fffffff - state_group->id);
-                    return true;
-                }
+                message_id = get_int_value(event.args[1]);
             }
             else if (event.command == from::talk_command::add_talk_list_data_if)
             {
-                auto message_id = get_int_value(event.args[2]);
-                if (message_id == ermerchant::event_text_for_talk::about_kale)
-                {
-                    about_kale_event = &event;
-                    add_menu_state = &state;
-                }
+                message_id = get_int_value(event.args[2]);
+            }
+            else
+            {
+                continue;
+            }
+
+            if (message_id == ermerchant::event_text_for_talk::purchase)
+            {
+                add_menu1_event = &event;
+            }
+            else if (message_id == ermerchant::event_text_for_talk::sell)
+            {
+                add_menu2_event = &event;
+            }
+            else if (message_id == ermerchant::event_text_for_talk::browse_inventory ||
+                     message_id == ermerchant::event_text_for_talk::browse_cut_content)
+            {
+                spdlog::debug("Not patching state group x{}, already patched",
+                              0x7fffffff - state_group->id);
+                return true;
+            }
+            else if (message_id == ermerchant::event_text_for_talk::about_kale)
+            {
+                about_kale_event = &event;
+                add_menu_state = &state;
             }
         }
 
