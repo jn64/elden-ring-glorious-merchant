@@ -12,6 +12,8 @@
 #include <set>
 #include <vector>
 
+#include <steam/isteamapps.h>
+
 #include "from/paramdef/EQUIP_PARAM_ACCESSORY_ST.hpp"
 #include "from/paramdef/EQUIP_PARAM_GEM_ST.hpp"
 #include "from/paramdef/EQUIP_PARAM_GOODS_ST.hpp"
@@ -133,9 +135,50 @@ static const std::set<int64_t> cut_content_accessories = {
     6121, // Unbeatable Trick Mirror
 };
 
+static const std::set<int64_t> tarnished_pack_goods = {
+    2009600, // Spectral Steed Regalia: Tree Sentinel
+    2009610, // Spectral Steed Regalia: Carian Silver
+    2009620, // Spectral Steed Regalia: Funereal Night
+};
+
+static const std::set<int64_t> tarnished_pack_protectors = {
+    5340000, // Broken Gold Mask
+    5340100, // Gold Tattoo (Chest)
+    5340200, // Gold Tattoo (Arm)
+    5340300, // Gold Tattoo (Leg)
+    5350000, // Silver Grooved Helm
+    5350100, // Silver Grooved Armor
+    5350200, // Silver Grooved Gauntlets
+    5350300, // Silver Grooved Greaves
+    5351100, // Silver Grooved Armor (Altered)
+    5360000, // Leontiel's Hat
+    5360100, // Leontiel's Armor
+    5360200, // Leontiel's Leather Gloves
+    5360300, // Leontiel's Boots
+    5361000, // Leontiel's Hat (Altered)
+    5370000, // Steel Helm
+    5370100, // Steel Armor
+    5370200, // Steel Gauntlets
+    5370300, // Steel Greaves
+};
+
+static const std::set<int64_t> tarnished_pack_weapons = {
+    3560000,  // Leontiel's Greatsword
+    13510000, // Golden Order Flail
+    31540000, // Silver Grooved Shield
+    62520000, // Ritual Thrusting Shield
+    64530000, // Reverse-Bladed Sword
+    66530000, // Reed Great Katana
+    67530000, // Idus Sword
+};
+
 static constexpr uint32_t kale_alive_flag_id = 4700;
 static constexpr uint32_t kale_hostile_flag_id = 4701;
 static constexpr uint32_t kale_dead_flag_id = 4703;
+
+static constexpr auto shadow_of_the_erdtree_app_id = AppId_t{2778580};
+
+static constexpr auto tarnished_pack_app_id = AppId_t{3655690};
 
 static from::CS::GameDataMan **game_data_man_addr;
 
@@ -371,6 +414,15 @@ void ermerchant::setup_shops()
     auto &dlc_material_lineups = mod_shops[20].lineups;
     auto &dlc_miscellaneous_item_lineups = mod_shops[21].lineups;
 
+    auto shadow_of_the_erdtree_installed =
+        SteamApps()->BIsDlcInstalled(shadow_of_the_erdtree_app_id);
+    auto tarnished_pack_installed = SteamApps()->BIsDlcInstalled(tarnished_pack_app_id);
+
+    SPDLOG_INFO("Shadow of the Erdtree {}",
+                shadow_of_the_erdtree_installed ? "installed" : "not installed");
+
+    SPDLOG_INFO("Tarnished Pack {}", tarnished_pack_installed ? "installed" : "not installed");
+
     // Look up event flags set when acquiring items like maps and cookbooks. Simply possessing
     // these items doesn't actually unlock anything, an event flag must also be set.
     std::map<int32_t, uint32_t> goods_flags;
@@ -446,10 +498,21 @@ void ermerchant::setup_shops()
 
         bool is_dlc = false;
         auto weapon_name = ermerchant::get_message(from::msgbnd::weapon_name, id);
-        if (weapon_name.empty())
+        if (weapon_name.empty() && shadow_of_the_erdtree_installed)
         {
             is_dlc = true;
             weapon_name = ermerchant::get_message(from::msgbnd::dlc_weapon_name, id);
+        }
+        if (tarnished_pack_weapons.contains(id))
+        {
+            if (tarnished_pack_installed)
+            {
+                is_dlc = true;
+            }
+            else
+            {
+                continue;
+            }
         }
 
         // Exclude weapon entries without valid names - these are placeholders for data used by
@@ -511,10 +574,21 @@ void ermerchant::setup_shops()
 
         bool is_dlc = false;
         auto protector_name = ermerchant::get_message(from::msgbnd::protector_name, id);
-        if (protector_name.empty())
+        if (protector_name.empty() && shadow_of_the_erdtree_installed)
         {
             is_dlc = true;
             protector_name = ermerchant::get_message(from::msgbnd::dlc_protector_name, id);
+        }
+        if (tarnished_pack_protectors.contains(id))
+        {
+            if (tarnished_pack_installed)
+            {
+                is_dlc = true;
+            }
+            else
+            {
+                continue;
+            }
         }
 
         if (protector_name.empty() || protector_name == cut_content_prefix)
@@ -545,7 +619,7 @@ void ermerchant::setup_shops()
     {
         bool is_dlc = false;
         auto accessory_name = ermerchant::get_message(from::msgbnd::accessory_name, id);
-        if (accessory_name.empty())
+        if (accessory_name.empty() && shadow_of_the_erdtree_installed)
         {
             is_dlc = true;
             accessory_name = ermerchant::get_message(from::msgbnd::dlc_accessory_name, id);
@@ -604,10 +678,21 @@ void ermerchant::setup_shops()
 
         bool is_dlc = false;
         auto goods_name = ermerchant::get_message(from::msgbnd::goods_name, id);
-        if (goods_name.empty())
+        if (goods_name.empty() && shadow_of_the_erdtree_installed)
         {
             is_dlc = true;
             goods_name = ermerchant::get_message(from::msgbnd::dlc_goods_name, id);
+        }
+        if (tarnished_pack_goods.contains(id))
+        {
+            if (tarnished_pack_installed)
+            {
+                is_dlc = true;
+            }
+            else
+            {
+                continue;
+            }
         }
 
         if (goods_name.empty() || goods_name == cut_content_prefix)
@@ -724,7 +809,7 @@ void ermerchant::setup_shops()
     {
         bool is_dlc = false;
         auto gem_name = ermerchant::get_message(from::msgbnd::gem_name, id);
-        if (gem_name.empty())
+        if (gem_name.empty() && shadow_of_the_erdtree_installed)
         {
             is_dlc = true;
             gem_name = ermerchant::get_message(from::msgbnd::dlc_gem_name, id);
