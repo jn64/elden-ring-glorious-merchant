@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.28.1)
 set(CMAKE_GENERATOR_PLATFORM x64)
 
 project(EldenRingMerchantMod
-  VERSION   "1.1.16"
+  VERSION   "1.2.2"
   LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -89,6 +89,7 @@ add_custom_command(TARGET EldenRingMerchantMod POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:EldenRingMerchantMod>
   ${CMAKE_SOURCE_DIR}/LICENSE.txt
   ${CMAKE_SOURCE_DIR}/ermerchant.ini
+  ${CMAKE_SOURCE_DIR}/ermerchant.me3
   COMMAND_EXPAND_LISTS)
 
 target_link_libraries(EldenRingMerchantMod
