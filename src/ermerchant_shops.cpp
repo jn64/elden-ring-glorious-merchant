@@ -164,6 +164,7 @@ static const std::set<int64_t> tarnished_pack_protectors = {
 
 static const std::set<int64_t> tarnished_pack_weapons = {
     3560000,  // Leontiel's Greatsword
+    8530000,  // Hefty Scimitar
     13510000, // Golden Order Flail
     31540000, // Silver Grooved Shield
     62520000, // Ritual Thrusting Shield
