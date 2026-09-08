@@ -13,7 +13,7 @@ include(FetchContent)
 
 FetchContent_Declare(minhook
   GIT_REPOSITORY        https://github.com/TsudaKageyu/minhook.git
-  GIT_TAG               f5485b8454544c2f034c78f8f127c1d03dea3636)
+  GIT_TAG               c3fcafdc10146beb5919319d0683e44e3c30d537) # v1.3.4
 
 FetchContent_Declare(pattern16
   GIT_REPOSITORY        https://github.com/Dasaav-dsv/Pattern16.git
