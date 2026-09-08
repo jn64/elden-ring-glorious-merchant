@@ -427,6 +427,12 @@ void ermerchant::setup_shops()
 
     SPDLOG_INFO("Tarnished Pack {}", tarnished_pack_installed ? "installed" : "not installed");
 
+    if (ermerchant::config::spoilers)
+    {
+        shadow_of_the_erdtree_installed = ermerchant::config::spoilers;
+        tarnished_pack_installed = ermerchant::config::spoilers;
+    }
+
     if (ermerchant::get_message(from::msgbnd::menu_text, ermerchant::menu_text::elden_ring_version)
             .find(L"ELDEN RING Reforged") != std::wstring_view::npos)
     {

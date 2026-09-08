@@ -5,6 +5,7 @@
 
 extern bool ermerchant::config::auto_upgrade_weapons = true;
 extern bool ermerchant::config::all_items_free = true;
+extern bool ermerchant::config::spoilers = true;
 
 void ermerchant::load_config(const std::filesystem::path &ini_path)
 {
@@ -18,11 +19,14 @@ void ermerchant::load_config(const std::filesystem::path &ini_path)
 
         if (config.has("auto_upgrade_weapons"))
             config::auto_upgrade_weapons = config["auto_upgrade_weapons"] != "false";
+        if (config.has("spoilers"))
+            config::spoilers = config["spoilers"] != "false";
 
         if (config.has("all_items_free"))
             config::all_items_free = config["all_items_free"] != "false";
 
         spdlog::info("auto_upgrade_weapons = {}", config::auto_upgrade_weapons);
         spdlog::info("all_items_free = {}", config::all_items_free);
+        spdlog::info("spoilers = {}", config::spoilers);
     }
 }

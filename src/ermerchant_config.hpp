@@ -20,5 +20,11 @@ extern bool auto_upgrade_weapons;
  * Make all items cost no runes
  */
 extern bool all_items_free;
+
+/**
+ * Show spoilers for DLC
+ */
+extern bool spoilers;
+
 };
 };
