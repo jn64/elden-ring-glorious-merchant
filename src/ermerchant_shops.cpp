@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <set>
 #include <vector>
+#include <spdlog/spdlog.h>
 
 #include <steam/isteamapps.h>
 
@@ -422,10 +423,10 @@ void ermerchant::setup_shops()
         SteamApps()->BIsDlcInstalled(shadow_of_the_erdtree_app_id);
     auto tarnished_pack_installed = SteamApps()->BIsDlcInstalled(tarnished_pack_app_id);
 
-    SPDLOG_INFO("Shadow of the Erdtree {}",
-                shadow_of_the_erdtree_installed ? "installed" : "not installed");
+    spdlog::info("Shadow of the Erdtree {}",
+                 shadow_of_the_erdtree_installed ? "installed" : "not installed");
 
-    SPDLOG_INFO("Tarnished Pack {}", tarnished_pack_installed ? "installed" : "not installed");
+    spdlog::info("Tarnished Pack {}", tarnished_pack_installed ? "installed" : "not installed");
 
     if (ermerchant::config::spoilers)
     {
@@ -436,7 +437,7 @@ void ermerchant::setup_shops()
     if (ermerchant::get_message(from::msgbnd::menu_text, ermerchant::menu_text::elden_ring_version)
             .find(L"ELDEN RING Reforged") != std::wstring_view::npos)
     {
-        SPDLOG_INFO("ELDEN RING Reforged installed");
+        spdlog::info("ELDEN RING Reforged installed");
     }
 
     // Look up event flags set when acquiring items like maps and cookbooks. Simply possessing
