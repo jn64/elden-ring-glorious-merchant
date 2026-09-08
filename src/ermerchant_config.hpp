@@ -16,5 +16,10 @@ namespace config
  */
 extern bool auto_upgrade_weapons;
 
+/**
+ * Show spoilers for DLC
+ */
+extern bool spoilers;
+
 };
 };

@@ -4,6 +4,7 @@
 #include <spdlog/spdlog.h>
 
 extern bool ermerchant::config::auto_upgrade_weapons = true;
+extern bool ermerchant::config::spoilers = true;
 
 void ermerchant::load_config(const std::filesystem::path &ini_path)
 {
@@ -17,7 +18,10 @@ void ermerchant::load_config(const std::filesystem::path &ini_path)
 
         if (config.has("auto_upgrade_weapons"))
             config::auto_upgrade_weapons = config["auto_upgrade_weapons"] != "false";
+        if (config.has("spoilers"))
+            config::spoilers = config["spoilers"] != "false";
 
         spdlog::info("auto_upgrade_weapons = {}", config::auto_upgrade_weapons);
+        spdlog::info("spoilers = {}", config::spoilers);
     }
 }
